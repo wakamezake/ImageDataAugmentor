@@ -6,6 +6,7 @@ from __future__ import print_function
 
 import os
 import threading
+
 import numpy as np
 from keras_preprocessing import get_keras_submodule
 
@@ -225,9 +226,11 @@ class BatchFromFilesMixin():
         batch_x = np.array([load_img(filepaths[x],
                                      color_mode=self.color_mode,
                                      target_size=self.target_size,
-                                     interpolation=self.interpolation) for x in index_array])
+                                     interpolation=self.interpolation) for x in
+                            index_array])
         # transform the image data
-        batch_x = np.array([self.image_data_generator.transform_image(x) for x in batch_x])
+        batch_x = np.array(
+            [self.image_data_generator.transform_image(x) for x in batch_x])
 
         # optionally save augmented images to disk for debugging purposes
         if self.save_to_dir:
@@ -268,7 +271,7 @@ class BatchFromFilesMixin():
         """List of absolute paths to image files"""
         raise NotImplementedError(
             '`filepaths` property method has not been implemented in {}.'
-            .format(type(self).__name__)
+                .format(type(self).__name__)
         )
 
     @property
@@ -276,12 +279,12 @@ class BatchFromFilesMixin():
         """Class labels of every observation"""
         raise NotImplementedError(
             '`labels` property method has not been implemented in {}.'
-            .format(type(self).__name__)
+                .format(type(self).__name__)
         )
 
     @property
     def sample_weight(self):
         raise NotImplementedError(
             '`sample_weight` property method has not been implemented in {}.'
-            .format(type(self).__name__)
+                .format(type(self).__name__)
         )

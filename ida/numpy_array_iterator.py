@@ -6,10 +6,11 @@ from __future__ import print_function
 
 import os
 import warnings
+
 import numpy as np
+from keras_preprocessing.image.utils import array_to_img
 
 from ida.iterator import Iterator
-from keras_preprocessing.image.utils import array_to_img
 
 
 class NumpyArrayIterator(Iterator):
@@ -82,7 +83,8 @@ class NumpyArrayIterator(Iterator):
             raise ValueError('`x` (images tensor) and `sample_weight` '
                              'should have the same length. '
                              'Found: x.shape = %s, sample_weight.shape = %s' %
-                             (np.asarray(x).shape, np.asarray(sample_weight).shape))
+                             (np.asarray(x).shape,
+                              np.asarray(sample_weight).shape))
         if subset is not None:
             if subset not in {'training', 'validation'}:
                 raise ValueError('Invalid subset name:', subset,
@@ -90,8 +92,8 @@ class NumpyArrayIterator(Iterator):
             split_idx = int(len(x) * image_data_generator._validation_split)
 
             if (y is not None and not
-                np.array_equal(np.unique(y[:split_idx]),
-                               np.unique(y[split_idx:]))):
+            np.array_equal(np.unique(y[:split_idx]),
+                           np.unique(y[split_idx:]))):
                 raise ValueError('Training and validation subsets '
                                  'have different number of classes after '
                                  'the split. If your numpy arrays are '
@@ -119,10 +121,11 @@ class NumpyArrayIterator(Iterator):
         if self.x.shape[channels_axis] not in {1, 3, 4}:
             warnings.warn('NumpyArrayIterator is set to use the '
                           'data format convention "' + data_format + '" '
-                          '(channels on axis ' + str(channels_axis) +
+                                                                     '(channels on axis ' + str(
+                channels_axis) +
                           '), i.e. expected either 1, 3, or 4 '
                           'channels on axis ' + str(channels_axis) + '. '
-                          'However, it was passed an array with shape ' +
+                                                                     'However, it was passed an array with shape ' +
                           str(self.x.shape) + ' (' +
                           str(self.x.shape[channels_axis]) + ' channels).')
         if y is not None:
@@ -144,16 +147,17 @@ class NumpyArrayIterator(Iterator):
                                                  seed)
 
     def _get_batches_of_transformed_samples(self, index_array):
-        
+
         # build batch of image data
         batch_x = np.array([self.x[j] for j in index_array])
-        
+
         # transform the image data
-        batch_x = np.array([self.image_data_generator.transform_image(x) for x in batch_x])
-        
+        batch_x = np.array(
+            [self.image_data_generator.transform_image(x) for x in batch_x])
+
         if self.y is not None:
             batch_y = np.array([self.y[j] for j in index_array])
-        
+
         else:
             batch_y = np.array([])
 
@@ -176,5 +180,3 @@ class NumpyArrayIterator(Iterator):
         if self.sample_weight is not None:
             output += (self.sample_weight[index_array],)
         return output
-
-
