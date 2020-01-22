@@ -12,7 +12,7 @@ import numpy as np
 import cv2
 
 from .iterator import BatchFromFilesMixin, Iterator
-from .utils import _list_valid_filenames_in_directory
+from ida.utils import _list_valid_filenames_in_directory
 
 
 class DirectoryIterator(BatchFromFilesMixin, Iterator):

@@ -9,7 +9,7 @@ import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 
-from .iterator import Iterator
+from ida.iterator import Iterator
 from .utils import array_to_img
 
 

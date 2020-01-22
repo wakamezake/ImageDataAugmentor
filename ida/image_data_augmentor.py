@@ -14,10 +14,8 @@ import warnings
 from six.moves import range
 
 import numpy as np
-import threading
-import cv2    
-from keras.utils import Sequence, to_categorical
-import threading
+import cv2
+from keras.utils import Sequence
 import random
 
 try:
@@ -31,7 +29,7 @@ except ImportError:
 
 from .dataframe_iterator import DataFrameIterator
 from .directory_iterator import DirectoryIterator
-from .numpy_array_iterator import NumpyArrayIterator
+from ida.numpy_array_iterator import NumpyArrayIterator
     
 class ImageDataAugmentor(Sequence):
     """Generate batches of tensor image data with real-time data augmentation.
