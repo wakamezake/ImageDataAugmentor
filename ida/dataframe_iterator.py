@@ -11,8 +11,7 @@ import numpy as np
 import cv2
 
 from .iterator import BatchFromFilesMixin, Iterator
-from ida.utils import validate_filename
-
+from keras_preprocessing.image.utils import validate_filename
 
 class DataFrameIterator(BatchFromFilesMixin, Iterator):
     """Iterator capable of reading images from a directory on disk

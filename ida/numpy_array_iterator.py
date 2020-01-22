@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from ida.iterator import Iterator
-from .utils import array_to_img
+from keras_preprocessing.image.utils import array_to_img
 
 
 class NumpyArrayIterator(Iterator):

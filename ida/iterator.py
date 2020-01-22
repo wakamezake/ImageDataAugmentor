@@ -15,8 +15,7 @@ try:
 except ImportError:
     IteratorType = object
 
-from ida.utils import (array_to_img,
-                       load_img)
+from keras_preprocessing.image.utils import array_to_img, load_img
 
 
 class Iterator(IteratorType):
