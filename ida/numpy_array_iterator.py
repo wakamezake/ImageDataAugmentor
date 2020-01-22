@@ -7,7 +7,6 @@ from __future__ import print_function
 import os
 import warnings
 import numpy as np
-import matplotlib.pyplot as plt
 
 from ida.iterator import Iterator
 from keras_preprocessing.image.utils import array_to_img
@@ -178,34 +177,4 @@ class NumpyArrayIterator(Iterator):
             output += (self.sample_weight[index_array],)
         return output
 
-    def show_batch(self, rows:int=5, **kwargs):
-        img_arr = np.random.choice(range(len(self.x)), rows**2)
-        if self.y is None:
-            imgs = self._get_batches_of_transformed_samples(img_arr)
-            lbls = None
-        else:
-            imgs, lbls = self._get_batches_of_transformed_samples(img_arr)
-            if imgs.shape == lbls.shape:
-                lbls = None
-        # try changing categorical labels into flat
-        try:
-            lbls = np.argmax(lbls, axis=1)
-        except:
-            lbls = None
-            pass
-        
-        if not 'figsize' in kwargs:
-            kwargs['figsize'] = (12,12)
 
-        plt.close('all')
-        plt.figure(**kwargs)
-
-        for idx, img in enumerate(imgs):
-            plt.subplot(rows, rows, idx+1)
-            plt.imshow(img.squeeze())
-            if lbls is not None:
-                plt.title(lbls[idx])
-            plt.axis('off')
-        
-        plt.subplots_adjust(hspace=0.5, wspace=0.5)
-        plt.show()

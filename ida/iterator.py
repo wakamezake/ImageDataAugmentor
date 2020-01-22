@@ -8,7 +8,6 @@ import os
 import threading
 import numpy as np
 from keras_preprocessing import get_keras_submodule
-import matplotlib.pyplot as plt
 
 try:
     IteratorType = get_keras_submodule('utils').Sequence
@@ -221,15 +220,15 @@ class BatchFromFilesMixin():
         # build batch of image data
         # self.filepaths is dynamic, is better to call it once outside the loop
         filepaths = self.filepaths
-        
+
         # build batch of image data
-        batch_x = np.array([load_img(filepaths[x], 
+        batch_x = np.array([load_img(filepaths[x],
                                      color_mode=self.color_mode,
-                                     target_size=self.target_size, 
-                                     interpolation=self.interpolation) for x in index_array])    
+                                     target_size=self.target_size,
+                                     interpolation=self.interpolation) for x in index_array])
         # transform the image data
         batch_x = np.array([self.image_data_generator.transform_image(x) for x in batch_x])
-        
+
         # optionally save augmented images to disk for debugging purposes
         if self.save_to_dir:
             for i, j in enumerate(index_array):
@@ -241,7 +240,7 @@ class BatchFromFilesMixin():
                     format=self.save_format)
                 img.save(os.path.join(self.save_to_dir, fname))
         # build batch of labels
-            
+
         if self.class_mode == 'input':
             batch_y = batch_x.copy()
         elif self.class_mode in {'binary', 'sparse'}:
@@ -263,38 +262,7 @@ class BatchFromFilesMixin():
             return batch_x, batch_y
         else:
             return batch_x, batch_y, self.sample_weight[index_array]
-    
-    def show_batch(self, rows:int=5, **kwargs):
-        img_arr = np.random.choice(range(len(self.classes)), rows**2)
-        if self.class_mode is None:
-            imgs = self._get_batches_of_transformed_samples(img_arr)
-        else:
-            imgs, _ = self._get_batches_of_transformed_samples(img_arr)
-        lbls = np.array(self.labels)[img_arr]
-        
-        try:
-            inv_class_indices = {v: k for k, v in self.class_indices.items()}
-            lbls = [inv_class_indices.get(k) for k in lbls]
-        except:
-            lbls = None
-            pass
-        
-        if not 'figsize' in kwargs:
-            kwargs['figsize'] = (12,12)
 
-        plt.close('all')
-        plt.figure(**kwargs)
-
-        for idx, img in enumerate(imgs):
-            plt.subplot(rows, rows, idx+1)
-            plt.imshow(img.squeeze())
-            if lbls is not None:
-                plt.title(lbls[idx])
-            plt.axis('off')
-        
-        plt.subplots_adjust(hspace=0.5, wspace=0.5)
-        plt.show()
-        
     @property
     def filepaths(self):
         """List of absolute paths to image files"""
