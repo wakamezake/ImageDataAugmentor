@@ -12,6 +12,7 @@ numpy = "==1.18.1"
 [dev-packages]
 pytest = "*"
 pillow = "*"
+albumentations = "*"
 
 [requires]
 python_version = "3.6"
