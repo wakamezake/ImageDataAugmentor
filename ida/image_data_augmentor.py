@@ -15,7 +15,7 @@ from six.moves import range
 
 import numpy as np
 import cv2
-from keras.utils import Sequence
+from tensorflow.keras.utils import Sequence
 import random
 
 try:
