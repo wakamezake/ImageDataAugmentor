@@ -10,15 +10,13 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import warnings
-from six.moves import range
-
-import numpy as np
-import threading
-import cv2    
-from keras.utils import Sequence, to_categorical
-import threading
 import random
+import warnings
+
+import cv2
+import numpy as np
+from six.moves import range
+from tensorflow.keras.utils import Sequence
 
 try:
     import scipy
@@ -28,11 +26,10 @@ try:
 except ImportError:
     scipy = None
 
+from keras_preprocessing.image import DataFrameIterator, DirectoryIterator
+from ida.numpy_array_iterator import NumpyArrayIterator
 
-from .dataframe_iterator import DataFrameIterator
-from .directory_iterator import DirectoryIterator
-from .numpy_array_iterator import NumpyArrayIterator
-    
+
 class ImageDataAugmentor(Sequence):
     """Generate batches of tensor image data with real-time data augmentation.
     The data will be looped over (in batches).
@@ -82,27 +79,26 @@ class ImageDataAugmentor(Sequence):
                  data_format='channels_last',
                  validation_split=0.0,
                  dtype='float32'):
-        
+
         self.featurewise_center = featurewise_center
         self.samplewise_center = samplewise_center
         self.featurewise_std_normalization = featurewise_std_normalization
         self.samplewise_std_normalization = samplewise_std_normalization
-        self.zca_whitening = zca_whitening         
+        self.zca_whitening = zca_whitening
         self.augment = augment
         self.augment_seed = augment_seed
         self.augment_mode = augment_mode
         if self.augment_mode == 'mask' and self.augment_seed == None:
             warnings.warn('This ImageDataAugmentor uses `augment_mode=mask` '
                           'but no `augment_seed` was given. Setting `augment_seed=0`.'
-                         )
+                          )
             self.augment_seed = 0
-            
+
         self.rescale = rescale
         self.preprocess_input = preprocess_input
         self.dtype = dtype
         self.total_transformations_done = 0
-       
-        
+
         if data_format not in {'channels_last', 'channels_first'}:
             raise ValueError(
                 '`data_format` should be `"channels_last"` '
@@ -123,11 +119,11 @@ class ImageDataAugmentor(Sequence):
                 '`validation_split` must be strictly between 0 and 1. '
                 ' Received: %s' % validation_split)
         self._validation_split = validation_split
-        
+
         self.mean = None
         self.std = None
         self.principal_components = None
-        
+
         if zca_whitening:
             if not featurewise_center:
                 self.featurewise_center = True
@@ -154,7 +150,7 @@ class ImageDataAugmentor(Sequence):
                               '`samplewise_std_normalization`, '
                               'which overrides setting of '
                               '`samplewise_center`.')
-                
+
     def flow(self,
              x,
              y=None,
@@ -220,7 +216,7 @@ class ImageDataAugmentor(Sequence):
             save_format=save_format,
             subset=subset
         )
-    
+
     def flow_from_directory(self,
                             directory,
                             target_size=(256, 256),
@@ -326,8 +322,7 @@ class ImageDataAugmentor(Sequence):
             subset=subset,
             interpolation=interpolation
         )
-    
-          
+
     def flow_from_dataframe(self,
                             dataframe,
                             directory=None,
@@ -429,9 +424,10 @@ class ImageDataAugmentor(Sequence):
             and `y` is a numpy array of corresponding labels.
         """
         if 'has_ext' in kwargs:
-            warnings.warn('has_ext is deprecated, filenames in the dataframe have '
-                          'to match the exact filenames in disk.',
-                          DeprecationWarning)
+            warnings.warn(
+                'has_ext is deprecated, filenames in the dataframe have '
+                'to match the exact filenames in disk.',
+                DeprecationWarning)
         if 'sort' in kwargs:
             warnings.warn('sort is deprecated, batches will be created in the'
                           'same order than the filenames provided if shuffle'
@@ -441,9 +437,10 @@ class ImageDataAugmentor(Sequence):
                           '`class_mode` "raw".', DeprecationWarning)
             class_mode = 'raw'
         if 'drop_duplicates' in kwargs:
-            warnings.warn('drop_duplicates is deprecated, you can drop duplicates '
-                          'by using the pandas.DataFrame.drop_duplicates method.',
-                          DeprecationWarning)
+            warnings.warn(
+                'drop_duplicates is deprecated, you can drop duplicates '
+                'by using the pandas.DataFrame.drop_duplicates method.',
+                DeprecationWarning)
 
         return DataFrameIterator(
             dataframe,
@@ -468,7 +465,6 @@ class ImageDataAugmentor(Sequence):
             validate_filenames=validate_filenames
         )
 
-    
     def standardize(self, x):
         """Applies the normalization configuration in-place to a batch of inputs.
         `x` is changed in-place since the function is mainly used internally
@@ -487,7 +483,7 @@ class ImageDataAugmentor(Sequence):
         if self.rescale:
             x = np.multiply(x, self.rescale)
         if self.samplewise_center:
-            x = x-np.mean(x, keepdims=True)
+            x = x - np.mean(x, keepdims=True)
         if self.samplewise_std_normalization:
             x = np.divide(x, (np.std(x, keepdims=True) + 1e-6))
 
@@ -519,53 +515,55 @@ class ImageDataAugmentor(Sequence):
                               'been fit on any training data. Fit it '
                               'first by calling `.fit(numpy_data)`.')
         return x
-    
-    
+
     def transform_image(self, image):
         """
         Add comments
         """
-            
-        if self.augment_mode=='mask':
+
+        if self.augment_mode == 'mask':
             if self.augment is not None:
                 if 'albumentations' in str(type(self.augment)):
                     if self.augment_seed:
-                        random.seed(self.augment_seed+self.total_transformations_done)
+                        random.seed(
+                            self.augment_seed + self.total_transformations_done)
                     data = self.augment(image=np.zeros_like(image), mask=image)
                     image = data['mask']
-                    
+
                 elif 'imgaug' in str(type(self.augment)):
-                    warnings.warn('imgaug does not yet support mask generation: consider using albumentations instead.'
-                                  'The masks were generated using the augmentations provided:'
-                                  'make sure they are fit for mask generation.')
-                    
+                    warnings.warn(
+                        'imgaug does not yet support mask generation: consider using albumentations instead.'
+                        'The masks were generated using the augmentations provided:'
+                        'make sure they are fit for mask generation.')
+
                     if self.augment_seed is not None:
-                        warnings.warn('You are using `imgaug` for mask generation.'
-                                      'Make sure to call imgaug augmentations with `.to_deterministic()` to ensure'
-                                      'that images and masks are augmented correctly together.')  
+                        warnings.warn(
+                            'You are using `imgaug` for mask generation.'
+                            'Make sure to call imgaug augmentations with `.to_deterministic()` to ensure'
+                            'that images and masks are augmented correctly together.')
                     image = self.augment(image=image)
-               
+
                 image = self.standardize(image)
-                self.total_transformations_done+=1
-                
+                self.total_transformations_done += 1
+
         else:
             if self.augment is not None:
                 if 'albumentations' in str(type(self.augment)):
                     if self.augment_seed is not None:
-                        random.seed(self.augment_seed+self.total_transformations_done)
-                        
-                    image = self.augment(image=image)['image']    
-                
+                        random.seed(
+                            self.augment_seed + self.total_transformations_done)
+
+                    image = self.augment(image=image)['image']
+
                 elif 'imgaug' in str(type(self.augment)):
                     image = self.augment(image=image)
-                    
+
             image = self.standardize(image)
-            
-            self.total_transformations_done+=1
-            
+
+            self.total_transformations_done += 1
+
         return image
-        
-         
+
     def fit(self, x,
             augment=False,
             rounds=1,
@@ -598,9 +596,9 @@ class ImageDataAugmentor(Sequence):
                 'following the data format convention "' +
                 self.data_format + '" (channels on axis ' +
                 str(self.channel_axis) + '), i.e. expected '
-                'either 1, 3 or 4 channels on axis ' +
+                                         'either 1, 3 or 4 channels on axis ' +
                 str(self.channel_axis) + '. '
-                'However, it was passed an array with shape ' +
+                                         'However, it was passed an array with shape ' +
                 str(x.shape) + ' (' + str(x.shape[self.channel_axis]) +
                 ' channels).')
 
@@ -623,7 +621,7 @@ class ImageDataAugmentor(Sequence):
             broadcast_shape = [1, 1, 1]
             broadcast_shape[self.channel_axis - 1] = x.shape[self.channel_axis]
             self.mean = np.reshape(self.mean, broadcast_shape)
-            x = x- self.mean
+            x = x - self.mean
 
         if self.featurewise_std_normalization:
             self.std = np.std(x, axis=(0, self.row_axis, self.col_axis))
