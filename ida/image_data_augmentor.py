@@ -26,8 +26,9 @@ try:
 except ImportError:
     scipy = None
 
-from keras_preprocessing.image import DataFrameIterator, DirectoryIterator
-from ida.numpy_array_iterator import NumpyArrayIterator
+from .dataframe_iterator import DataFrameIterator
+from .directory_iterator import DirectoryIterator
+from .numpy_array_iterator import CustomNumpyArrayIterator as NumpyArrayIterator
 
 
 class ImageDataAugmentor(Sequence):
